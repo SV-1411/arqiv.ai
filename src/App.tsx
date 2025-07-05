@@ -9,7 +9,7 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { ImageResult } from './types';
 
 function App() {
-  const [pageTitle, setPageTitle] = useState('ThinkVault');
+  const [pageTitle, setPageTitle] = useState('Arqiv.ai');
   const [input, setInput] = useState('');
   const [result, setResult] = useState('');
   const [isLoading, setIsLoading] = useState(false);
