@@ -1,6 +1,6 @@
 import React from 'react';
-import { FileText, Image, Clock, Globe, BookOpen, Bookmark, RefreshCw, ImageIcon, Search, Sparkles, Cloud, CloudOff } from 'lucide-react';
-import { ImageResult } from '../App';
+import { FileText, Clock, Globe, BookOpen, Bookmark, RefreshCw, Search, Sparkles, ImageIcon } from 'lucide-react';
+import { ImageResult } from '../types';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface ResultsDisplayProps {
@@ -9,8 +9,8 @@ interface ResultsDisplayProps {
   isRegenerating: boolean;
   mode: string;
   depth: string;
-  wikiImage: string;
   images: ImageResult[];
+  wikiImage?: string;
   input: string;
   suggestions: string[];
   isLoadingSuggestions: boolean;
@@ -22,12 +22,12 @@ interface ResultsDisplayProps {
 }
 
 export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
+  wikiImage,
   result,
   isLoading,
   isRegenerating,
   mode,
   depth,
-  wikiImage,
   images,
   input,
   suggestions,
@@ -259,7 +259,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
                   <button
                     key={index}
                     onClick={() => onSuggestionClick(suggestion)}
-                    className="group relative bg-gradient-to-r from-[#2a2a2a] to-[#1f1f1f] border border-gray-600 rounded-full px-6 py-3 text-white font-medium hover:from-[#00bfff] hover:to-purple-500 hover:border-transparent transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer"
+                    className="bg-surface-200 hover:bg-accent-600 text-parchment-200 font-semibold py-2 px-4 rounded-lg transition-colors shadow-md w-full text-center"
                   >
                     <div className="flex items-center">
                       <Sparkles className="w-4 h-4 mr-2 text-gray-400 group-hover:text-white transition-colors duration-300" />
@@ -288,7 +288,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
           <button
             onClick={onRegenerate}
             disabled={isRegenerating}
-            className="flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-2xl hover:from-orange-600 hover:to-red-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="flex items-center px-6 py-3 bg-accent-500 text-white font-semibold rounded-2xl hover:bg-accent-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             <RefreshCw className={`w-5 h-5 mr-2 ${isRegenerating ? 'animate-spin' : ''}`} />
             {isRegenerating ? 'Regenerating...' : 'Regenerate Answer'}
@@ -298,7 +298,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
             id="save-button"
             onClick={onSave}
             disabled={isSaving}
-            className="flex items-center px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-2xl hover:from-purple-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="flex items-center px-8 py-3 bg-accent-500 text-white font-semibold rounded-2xl hover:bg-accent-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             title={getSaveButtonTitle()}
           >
             {renderSaveIcon()}

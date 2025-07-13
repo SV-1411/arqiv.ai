@@ -73,7 +73,7 @@ export const SavedResearchPage: React.FC<SavedResearchPageProps> = ({ user, onSu
 
     if (!user) {
       return (
-        <div className="text-center p-8 bg-[#1a1a1a] rounded-lg">
+        <div className="text-center p-8 bg-surface-100 rounded-lg">
           <p className="text-gray-300 text-lg">Please sign in to view your saved research.</p>
         </div>
       );
@@ -81,9 +81,9 @@ export const SavedResearchPage: React.FC<SavedResearchPageProps> = ({ user, onSu
 
     if (savedItems.length === 0) {
       return (
-        <div className="text-center p-8 bg-[#1a1a1a] rounded-lg">
+        <div className="text-center p-8 bg-surface-100 rounded-lg">
           <p className="text-gray-300 text-lg">You have no saved research yet.</p>
-          <p className="text-gray-400 mt-2">Go back to the <a href="/" className="text-blue-400 hover:underline">homepage</a> to start your first research.</p>
+          <p className="text-gray-400 mt-2">Go back to the <a href="/" className="text-accent-500 hover:underline">homepage</a> to start your first research.</p>
         </div>
       );
     }
@@ -101,7 +101,7 @@ export const SavedResearchPage: React.FC<SavedResearchPageProps> = ({ user, onSu
   return (
     <div className="space-y-8">
       <Helmet>
-        <title>Saved Research - ThinkVault</title>
+        <title>Saved Research - arqivAi</title>
       </Helmet>
       <h2 className="text-3xl font-bold text-white">Saved Research</h2>
       {renderContent()}

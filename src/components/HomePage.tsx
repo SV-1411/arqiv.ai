@@ -7,6 +7,8 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { ImageResult } from '../types';
 
 interface HomePageProps {
+  trendingSuggestions: string[];
+  isLoadingTrending: boolean;
   input: string;
   setInput: (input: string) => void;
   mode: string;
@@ -102,14 +104,14 @@ export const HomePage: React.FC<HomePageProps> = (props) => {
         </div>
       )}
       <Helmet>
-        <title>ThinkVault - AI-Powered Research Assistant</title>
-        <meta name="description" content="Unlock deeper insights with ThinkVault, an AI-powered research assistant that synthesizes information from multiple sources to give you comprehensive answers. Start your intelligent search today." />
+        <title>arqivAi - AI-Powered Research Assistant</title>
+        <meta name="description" content="Unlock deeper insights with arqivAi, an AI-powered research assistant that synthesizes information from multiple sources to give you comprehensive answers. Start your intelligent search today." />
       </Helmet>
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-extrabold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+        <h1 className="text-4xl md:text-5xl font-extrabold mb-8 font-mono text-accent-500">
           Unlock the Power of Informed <span className="whitespace-nowrap">Decision-Making</span>
         </h1>
-        <p className="text-lg text-gray-300 max-w-2xl mx-auto">Say goodbye to information overload and hello to actionable insights. ThinkVault's AI-powered research tool helps you make informed decisions faster, saving you time and effort.</p>
+        <p className="text-lg text-gray-300 max-w-2xl mx-auto">Say goodbye to information overload and hello to actionable insights. arqivAi's AI-powered research tool helps you make informed decisions faster, saving you time and effort.</p>
       </div>
 
       <SearchForm
@@ -124,6 +126,21 @@ export const HomePage: React.FC<HomePageProps> = (props) => {
         onKeyPress={props.onKeyPress}
       />
       
+      {(props.trendingSuggestions.length > 0 || props.isLoadingTrending) && (
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          {props.isLoadingTrending ? (
+            Array.from({ length: 5 }).map((_, idx) => <div key={idx} className="animate-pulse bg-gray-600 rounded-full px-6 py-3 h-10 w-40"></div>)
+          ) : (
+            props.trendingSuggestions.slice(0, 4).map((s, idx) => (
+              <button key={idx} onClick={() => props.onSuggestionClick(s)} className="bg-surface-200 hover:bg-accent-600 text-parchment-200 font-semibold py-2 px-4 rounded-lg transition-colors shadow-md text-center flex-grow sm:flex-grow-0">
+                {s}
+              </button>
+            ))
+
+          )}
+        </div>
+      )}
+
       <div className="mt-12">
         <ResultsDisplay
           result={props.result}

@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Footer } from './components/Footer';
+
+import { AiPage } from './components/AiPage';
+import { Book } from './components/Book';
+import { RequireAuth } from './components/RequireAuth';
 import { Header } from './components/Header';
-import { HomePage } from './components/HomePage';
-import { SavedResearchPage } from './components/SavedResearchPage';
+import { BookProvider } from './components/BookContext';
+import LandingPage from './components/LandingPage.tsx';
+import AboutPage from './components/AboutPage.tsx';
+
 import { supabase } from './lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { ImageResult } from './types';
@@ -18,11 +24,15 @@ function App() {
   const [wikiImage, setWikiImage] = useState('');
   const [images, setImages] = useState<ImageResult[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [trendingSuggestions, setTrendingSuggestions] = useState<string[]>([]);
+  const [isLoadingTrending, setIsLoadingTrending] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const navigate = useNavigate();
+  
+  
 
   // Initialize auth state and set up listener
   useEffect(() => {
@@ -105,21 +115,25 @@ function App() {
     };
   }, []);
 
-  const fetchWikiSummary = async (topic: string) => {
+  const fetchWikiSummary = async (topic: string): Promise<{ extract: string | null; thumbnail: string | null }> => {
     try {
-      const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`);
-      
+      const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic.trim())}`;
+      const response = await fetch(url);
       if (!response.ok) {
+        if (response.status === 404) {
+          console.log(`No Wikipedia page found for "${topic}".`);
+        } else {
+          console.error(`Wikipedia API error for "${topic}": ${response.status}`);
+        }
         return { extract: null, thumbnail: null };
       }
-      
       const data = await response.json();
       return {
         extract: data.extract || null,
         thumbnail: data.thumbnail?.source || null
       };
     } catch (error) {
-      console.error('Wikipedia API error:', error);
+      console.error(`Failed to fetch Wikipedia summary for "${topic}":`, error);
       return { extract: null, thumbnail: null };
     }
   };
@@ -169,21 +183,7 @@ function App() {
     }
   };
 
-  const fetchNewsImages = async (query: string): Promise<ImageResult[]> => {
-    try {
-      // Using NewsAPI for news-related images (requires API key in production)
-      // For demo purposes, we'll simulate news image structure
-      console.log('News images would be fetched for:', query);
-      
-      // In production, you would use:
-      // const response = await fetch(`https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&apiKey=YOUR_API_KEY&pageSize=3`);
-      
-      return []; // Return empty for now - would need API key
-    } catch (error) {
-      console.error('News API error:', error);
-      return [];
-    }
-  };
+  
 
   const fetchResearchImages = async (topic: string): Promise<ImageResult[]> => {
     const allImages: ImageResult[] = [];
@@ -249,13 +249,26 @@ function App() {
     };
   };
 
-  const generatePrompt = (question: string, wikiData: any, mode: string, depth: string, isRegeneration: boolean = false) => {
+  interface UserAISettings {
+    understanding: 'Beginner' | 'Intermediate' | 'Expert';
+    tone: 'Formal' | 'Friendly' | 'Humorous';
+    length: 'Concise' | 'Detailed';
+    language: 'English' | 'Spanish' | 'French';
+    citations: 'Yes' | 'No';
+    format: 'Bullet Points' | 'Paragraphs' | 'Mixed';
+    additionalPrompt: string;
+  }
+
+  const generatePrompt = (question: string, wikiData: any, mode: string, depth: string, settings: UserAISettings | null, isRegeneration: boolean = false) => {
     const wikiExtract = wikiData.extract;
     const searchContext = null; // Prepared for future web search integration
     
     const variations = getRandomPromptVariations();
     const randomSeed = Math.floor(Math.random() * 1000);
     
+    // Build customization snippet
+    const customizationSnippet = settings ? `\n--- USER PREFERENCES ---\n- Understanding Level: ${settings.understanding}\n- Desired Tone: ${settings.tone}\n- Answer Length: ${settings.length}\n- Language: ${settings.language}\n- Citations: ${settings.citations}\n- Preferred Format: ${settings.format}\n- Additional Instructions: ${settings.additionalPrompt || 'None'}\n` : '';
+
     const basePrompt = `You are a knowledge analyst and OSINT assistant trained to provide structured, research-grade information retrieval and presentation.
 
 ${variations.tone}
@@ -275,7 +288,7 @@ ${searchContext || 'No additional web search data available'}
 INSTRUCTIONS:
 Follow this exact structure for your response, but vary your examples, facts, and perspectives:
 
-📌 **Summary**
+🔍 **Conclusion (Short)**
 Write a 2-3 line abstract that captures the core essence from a ${variations.structure} perspective.
 
 📂 **Detailed Information**
@@ -298,7 +311,7 @@ Use bullet points and emphasize:
 - Include comparative statistics across eras
 - Highlight surprising numerical insights
 
-🔗 **Sources & Citations**
+🔗 **Sources & Citations (Include Trustworthiness Rating 1-5⭐)**
 - Reference Wikipedia data when used
 - Mention the reliability and completeness of available information
 - Note any gaps or limitations in the data
@@ -328,6 +341,7 @@ ${depth === 'Detailed Research' ? '- Provide comprehensive coverage across multi
 ${depth === 'Investigator Mode' ? '- Include lesser-known facts, cultural variants, and cross-temporal analysis' : ''}
 ${depth === 'Everything' ? '- Combine all approaches with maximum detail and multi-era research suggestions' : ''}
 
+${customizationSnippet}
 FORMAT REQUIREMENTS:
 - Use proper markdown formatting
 - Maintain clear visual hierarchy
@@ -434,7 +448,14 @@ Generate 5 similar curious topics related to "${topic}":`;
       const fetchedImages = await fetchResearchImages(question);
       setImages(fetchedImages);
       
-      const prompt = generatePrompt(question, wikiData, mode, depth, isRegeneration);
+      let userSettings: UserAISettings | null = null;
+      if (user) {
+        const raw = localStorage.getItem(`custom_settings_${user.id}`);
+        if (raw) {
+          try { userSettings = JSON.parse(raw); } catch {}
+        }
+      }
+      const prompt = generatePrompt(question, wikiData, mode, depth, userSettings, isRegeneration);
       
       const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
       if (!apiKey) {
@@ -482,7 +503,7 @@ Generate 5 similar curious topics related to "${topic}":`;
 
   const handleAskAI = (question: string) => {
     if (isLoading || isRegenerating || !question.trim()) return;
-    setPageTitle(`${question} - ThinkVault`);
+    setPageTitle(`${question} - arqivAi`);
     askGPT(question);
   };
 
@@ -507,6 +528,104 @@ Generate 5 similar curious topics related to "${topic}":`;
     }
   };
 
+  // Fetch trending topics once on load
+  useEffect(() => {
+    const fetchTrending = async () => {
+      setIsLoadingTrending(true);
+      const applyTopics = (arr: string[]) => {
+        if (arr && arr.length) setTrendingSuggestions(arr.slice(0, 8));
+      };
+
+      /* ---- 1) Reddit API (Primary) ---- */
+      try {
+        const r = await fetch('https://www.reddit.com/r/worldnews/top.json?limit=10&t=day');
+        if (r.ok) {
+          const d = await r.json();
+          const list = d.data?.children?.map((c: any) => (c.data.title as string));
+          if (list?.length) {
+            applyTopics(list);
+            setIsLoadingTrending(false);
+            return; // Success, exit
+          }
+        }
+      } catch (e) {
+        console.warn('Reddit fetch failed, falling back...', e);
+      }
+
+      /* ---- 2) OpenAI Fallback ---- */
+      const openAiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      if (openAiKey) {
+        try {
+          await new Promise(r => setTimeout(r, 200)); // backoff
+          const aiResp = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${openAiKey}` },
+            body: JSON.stringify({
+              model: 'gpt-3.5-turbo',
+              messages: [{ role: 'user', content: 'Provide 8 trending topics, concise (<=5 words), as a comma-separated string.' }],
+              temperature: 0.7, max_tokens: 100
+            })
+          });
+          if (aiResp.ok) {
+            const data = await aiResp.json();
+            const list = data.choices?.[0]?.message?.content?.split(',').map((s: string) => s.trim()).slice(0, 8);
+            if (list?.length) {
+              applyTopics(list);
+              setIsLoadingTrending(false);
+              return; // Success, exit
+            }
+          }
+        } catch (e) {
+          console.warn('OpenAI fallback failed', e);
+        }
+      }
+
+      /* ---- 3) OpenRouter Fallback ---- */
+      const openRouterKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+      if (openRouterKey) {
+        try {
+          await new Promise(r => setTimeout(r, 200)); // backoff
+          const orResp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${openRouterKey}` },
+            body: JSON.stringify({
+              model: 'meta-llama/llama-3-8b-instruct',
+              messages: [{ role: 'user', content: 'Give 8 trending topics, concise (<=5 words), as a comma-separated string.' }],
+              temperature: 0.7, max_tokens: 100
+            })
+          });
+          if (orResp.ok) {
+            const orData = await orResp.json();
+            const list = orData.choices?.[0]?.message?.content?.split(',').map((s: string) => s.trim()).slice(0, 8);
+            if (list?.length) {
+              applyTopics(list);
+              setIsLoadingTrending(false);
+              return; // Success, exit
+            }
+          }
+        } catch (e) {
+          console.warn('OpenRouter fallback failed', e);
+        }
+      }
+
+      /* ---- 4) Static Fallback (Last Resort) ---- */
+      console.warn('All trending APIs failed, using static list.');
+      const staticTopics = [
+        'Latest AI advancements',
+        'Global economic outlook',
+        'Space exploration news',
+        'Renewable energy breakthroughs',
+        'Future of remote work',
+        'Cybersecurity trends',
+        'Developments in biotech',
+        'Sustainable agriculture',
+      ];
+      applyTopics(staticTopics);
+      setIsLoadingTrending(false);
+    };
+    fetchTrending();
+  }, []);
+
   // Show loading screen while checking auth
   if (authLoading) {
     return (
@@ -520,58 +639,52 @@ Generate 5 similar curious topics related to "${topic}":`;
     );
   }
 
+  const pages = [
+    <LandingPage key="home" />,
+    <AboutPage key="about" />,
+    <RequireAuth key="ai" user={user}>
+      <AiPage
+        key="ai-inner"
+        trendingSuggestions={trendingSuggestions}
+        isLoadingTrending={isLoadingTrending}
+        input={input}
+        setInput={setInput}
+        mode={mode}
+        setMode={setMode}
+        depth={depth}
+        setDepth={setDepth}
+        isLoading={isLoading}
+        onSubmit={handleAskAI}
+        onKeyPress={handleKeyPress}
+        result={result}
+        isRegenerating={isRegenerating}
+        wikiImage={wikiImage}
+        images={images}
+        suggestions={suggestions}
+        isLoadingSuggestions={isLoadingSuggestions}
+        onRegenerate={handleRegenerateAnswer}
+        onSuggestionClick={handleSuggestionClick}
+        user={user}
+        backgroundClass="bg-[#0a0a0a]"
+      />
+    </RequireAuth>,
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#2a1a2a] text-white">
-      <Helmet>
-        <title>{pageTitle}</title>
-      </Helmet>
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-50" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-        }}></div>
-        
+    <>
+    <BookProvider>
+      <div className="relative min-h-screen bg-gray-100 dark:bg-gray-900">
+        <Helmet>
+          <title>{pageTitle}</title>
+        </Helmet>
         <Header user={user} isAuthLoading={authLoading} />
-
-      <main className="relative container mx-auto px-4 py-8 max-w-5xl pt-24">
-        <Routes>
-          <Route path="/" element={
-            <HomePage 
-              input={input}
-              setInput={setInput}
-              mode={mode}
-              setMode={setMode}
-              depth={depth}
-              setDepth={setDepth}
-              isLoading={isLoading}
-              onSubmit={handleAskAI}
-              onKeyPress={handleKeyPress}
-              result={result}
-              isRegenerating={isRegenerating}
-              wikiImage={wikiImage}
-              images={images}
-              suggestions={suggestions}
-              isLoadingSuggestions={isLoadingSuggestions}
-              onRegenerate={handleRegenerateAnswer}
-              onSuggestionClick={handleSuggestionClick}
-              user={user}
-            />
-          } />
-          <Route path="/saved" element={<SavedResearchPage user={user} onSuggestionClick={handleSuggestionClick} />} />
-        </Routes>
-
-        {/* Footer */}
-        <div className="text-center mt-16 text-gray-500">
-          <div className="flex items-center justify-center space-x-4 mb-4">
-            <div className="h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent flex-1"></div>
-            <span className="text-sm font-medium">AI Research Hub</span>
-            <div className="h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent flex-1"></div>
-          </div>
-          <p className="text-sm">
-            Powered by advanced AI • Enhanced with OSINT methodology • Built for researchers
-          </p>
-        </div>
-      </main>
-    </div>
+        <Book pages={pages} />
+      </div>
+     
+    </BookProvider>
+   
+    <Footer />
+    </>
   );
 }
 

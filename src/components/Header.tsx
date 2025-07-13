@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useBook } from './BookContext';
+import { useNavigate } from 'react-router-dom';
 import { Link, useLocation } from 'react-router-dom';
 import { Brain, Sparkles, User, LogOut, Bookmark, Home } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -14,7 +16,8 @@ export const Header: React.FC<HeaderProps> = ({ user, isAuthLoading }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const location = useLocation();
+  const { goToPage } = useBook();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     if (isSigningOut) {
@@ -55,49 +58,52 @@ export const Header: React.FC<HeaderProps> = ({ user, isAuthLoading }) => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#1a1a1a]/80 backdrop-blur-lg border-b border-gray-700/50 shadow-lg">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-surface-100/90 backdrop-blur-sm border-b border-surface-200/50 shadow-sm">
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
           {/* Logo and Title */}
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <img src="/research.png" alt="ThinkVault Logo" className="w-10 h-10" />
+              <img src="/aifinal.png" alt="arqivAi Logo" className="w-10 h-10" />
               <Sparkles className="w-4 h-4 text-yellow-400 absolute -top-1 -right-1 animate-pulse" />
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-blue-100 to-[#00bfff] bg-clip-text text-transparent">
-              ThinkVault
+            <h1 className="text-2xl font-bold font-mono text-accent-500">
+              arqivAi
             </h1>
           </div>
 
-          {/* Right side of Navbar */}
-          <div className="flex items-center space-x-4">
-            {location.pathname === '/saved' ? (
-              <Link to="/" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors">
-                <Home className="w-5 h-5" />
-                <span>Home</span>
-              </Link>
-            ) : (
-              <Link to="/saved" className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors">
-                <Bookmark className="w-5 h-5" />
-                <span>Saved</span>
-              </Link>
-            )}
+          {/* Navbar Links */}
+          <div className="flex items-center space-x-6">
+            <button onClick={() => {goToPage(0); navigate('/');}} className="flex items-center space-x-2 text-accent-500 hover:text-accent-600 transition-colors">
+              <Home className="w-5 h-5" />
+              <span>Home</span>
+            </button>
+
+            <button onClick={() => {goToPage(1); navigate('/about');}} className="flex items-center space-x-2 text-accent-500 hover:text-accent-600 transition-colors">
+              <Sparkles className="w-5 h-5" />
+              <span>About Us</span>
+            </button>
+
+            <button onClick={() => {goToPage(2); navigate('/ai');}} className="flex items-center space-x-2 text-accent-500 hover:text-accent-600 transition-colors">
+              <Brain className="w-5 h-5" />
+              <span>AI</span>
+            </button>
 
             {/* Auth Section */}
             <div>
               {isAuthLoading ? (
-                <div className="flex items-center space-x-2 bg-gradient-to-r from-[#2a2a2a] to-[#1f1f1f] border border-gray-600 rounded-full px-4 py-2">
+                <div className="flex items-center space-x-2 bg-gradient-to-r from-white to-gray-50 border border-indigo-200 rounded-full px-4 py-2">
                   <div className="w-4 h-4 border-2 border-[#00bfff] border-t-transparent rounded-full animate-spin"></div>
-                  <span className="text-gray-400 text-sm">Loading...</span>
+                  <span className="text-indigo-600 text-sm">Loading...</span>
                 </div>
               ) : user ? (
                 <div className="relative">
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center space-x-3 bg-gradient-to-r from-[#2a2a2a] to-[#1f1f1f] border border-gray-600 rounded-full px-4 py-2 text-white hover:from-[#333333] hover:to-[#2a2a2a] transition-all duration-300 shadow-lg"
+                    className="flex items-center space-x-3 bg-gradient-to-r from-white to-gray-50 border border-indigo-200 rounded-full px-4 py-2 text-indigo-800 hover:from-indigo-50 hover:to-indigo-100 transition-all duration-300 shadow-lg"
                     disabled={isSigningOut}
                   >
-                    <div className="w-8 h-8 bg-gradient-to-r from-[#00bfff] to-purple-500 rounded-full flex items-center justify-center">
-                      <User className="w-4 h-4 text-white" />
+                    <div className="w-8 h-8 bg-accent-500 rounded-full flex items-center justify-center">
+                      <User className="w-4 h-4 text-indigo-900" />
                     </div>
                     <span className="text-sm font-medium hidden sm:block">
                       {getUserDisplayName(user)}
@@ -106,9 +112,9 @@ export const Header: React.FC<HeaderProps> = ({ user, isAuthLoading }) => {
 
                   {/* User Menu Dropdown */}
                   {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-[#2a2a2a] border border-gray-600 rounded-xl shadow-xl z-50">
+                    <div className="absolute right-0 mt-2 w-48 bg-[#1a1a1a] border border-indigo-200 rounded-xl shadow-xl z-50">
                       <div className="p-3 border-b border-gray-600">
-                        <p className="text-white font-medium text-sm">{getUserDisplayName(user)}</p>
+                        <p className="text-indigo-900 font-medium text-sm">{getUserDisplayName(user)}</p>
                         <p className="text-gray-400 text-xs truncate">{user.email}</p>
                       </div>
                       
@@ -140,7 +146,7 @@ export const Header: React.FC<HeaderProps> = ({ user, isAuthLoading }) => {
               ) : (
                 <button
                   onClick={() => setIsAuthModalOpen(true)}
-                  className="flex items-center space-x-2 bg-gradient-to-r from-[#00bfff] to-purple-500 text-white px-4 py-2 rounded-full hover:from-[#0099cc] hover:to-purple-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                  className="flex items-center space-x-2 bg-accent-500 text-white px-4 py-2 rounded-full hover:bg-accent-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
                 >
                   <User className="w-4 h-4" />
                   <span className="text-sm font-medium">Sign In</span>

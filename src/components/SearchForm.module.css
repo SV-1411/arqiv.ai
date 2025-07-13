@@ -1,0 +1,113 @@
+.searchForm {
+  background-color: var(--card-bg-color);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.inputContainer {
+  display: flex;
+  align-items: center;
+  background-color: var(--input-bg-color);
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.inputContainer:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+.searchInput {
+  flex-grow: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 1rem;
+  padding: 0.5rem;
+}
+
+.searchInput:focus {
+  outline: none;
+}
+
+.micButton {
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: var(--icon-color);
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.micButton:hover {
+  background-color: var(--hover-bg-color);
+}
+
+.optionsContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.selectWrapper {
+  position: relative;
+}
+
+.select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: var(--input-bg-color);
+  border: 1px solid var(--border-color);
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  border-radius: 0.5rem;
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.select:hover {
+  border-color: var(--primary-color);
+}
+
+.chevron {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--icon-color);
+}
+
+.searchButton {
+  background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.searchButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+}
+
+.searchButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronDown, Search, Zap, Brain, Mic, MicOff, AlertCircle, Wifi, WifiOff } from 'lucide-react';
+import { ChevronDown, Search, Zap, Brain, Mic, MicOff, AlertCircle, WifiOff } from 'lucide-react';
 
 interface SearchFormProps {
   input: string;
@@ -402,7 +402,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({
       case 'listening':
         return baseClass + "bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/50 hover:bg-red-600";
       case 'processing':
-        return baseClass + "bg-blue-500 text-white animate-pulse";
+        return baseClass + "bg-accent-500 text-white animate-pulse";
       case 'error':
         // Allow clicking if it's a network error and we're back online
         const isNetworkErrorAndOnline = speechError.includes('network') && isOnline;
@@ -412,7 +412,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({
       case 'unsupported':
         return baseClass + "bg-gray-500 bg-opacity-20 text-gray-500 cursor-not-allowed";
       default:
-        return baseClass + "bg-[#00bfff] bg-opacity-20 text-[#00bfff] hover:bg-opacity-30 hover:scale-110 cursor-pointer";
+        return baseClass + "bg-accent-500 bg-opacity-20 text-accent-500 hover:bg-opacity-30 hover:scale-110 cursor-pointer";
     }
   };
 
@@ -441,7 +441,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({
         {/* Search Mode */}
         <div className="flex flex-col space-y-2">
           <label htmlFor="searchMode" className="text-gray-300 font-medium text-lg flex items-center">
-            <Search className="w-5 h-5 mr-2 text-[#00bfff]" />
+            <Search className="w-5 h-5 mr-2 text-[#c89b3c]" />
             Research Category
           </label>
           <div className="relative">
@@ -449,7 +449,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({
               id="searchMode"
               value={mode}
               onChange={(e) => setMode(e.target.value)}
-              className="w-full px-6 py-4 bg-[#2a2a2a] border border-gray-600 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-[#00bfff] focus:border-transparent transition-all duration-300 text-lg appearance-none cursor-pointer hover:bg-[#333333]"
+              className="w-full px-6 py-4 bg-[#2a2a2a] border border-gray-600 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-[#c89b3c] focus:border-transparent transition-all duration-300 text-lg appearance-none cursor-pointer hover:bg-[#333333]"
               disabled={isLoading}
             >
               <option value="Person">👤 Person</option>
@@ -495,7 +495,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={onKeyPress}
           placeholder="Enter your research topic... (e.g., 'Napoleon Bonaparte', 'World War II', '1969')"
-          className="w-full px-6 py-5 pr-24 bg-[#2a2a2a] border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00bfff] focus:border-transparent transition-all duration-300 text-lg hover:bg-[#333333]"
+          className="w-full px-6 py-5 pr-24 bg-[#2a2a2a] border border-gray-600 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#c89b3c] focus:border-transparent transition-all duration-300 text-lg hover:bg-[#333333]"
           disabled={isLoading}
         />
         
@@ -503,7 +503,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({
         <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center space-x-3">
           {/* Network Status Indicator */}
           {!isOnline && (
-            <WifiOff className="w-5 h-5 text-red-400" title="No internet connection" />
+            <WifiOff className="w-5 h-5 text-red-400" />
           )}
           
           {/* Voice Input Button */}
@@ -604,7 +604,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({
           id="askButton"
           onClick={onSubmit}
           disabled={isLoading || !input.trim()}
-          className="px-10 py-4 bg-gradient-to-r from-[#00bfff] to-purple-500 text-white font-semibold rounded-2xl hover:from-[#0099cc] hover:to-purple-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-lg min-w-[200px]"
+          className="px-10 py-4 bg-gradient-to-r from-[#c89b3c] to-[#a77d2e] text-white font-semibold rounded-2xl hover:from-[#d4a84d] hover:to-[#8d6426] transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-lg min-w-[200px]"
         >
           {isLoading ? (
             <span className="flex items-center justify-center">

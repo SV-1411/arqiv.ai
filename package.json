@@ -13,12 +13,14 @@
     "@supabase/supabase-js": "^2.39.0",
     "@types/jsdom": "^21.1.7",
     "@types/react-router-dom": "^5.3.3",
+    "framer-motion": "^12.23.3",
     "jsdom": "^26.1.0",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-helmet-async": "^2.0.5",
     "react-markdown": "^10.1.0",
+    "react-pageflip": "^2.0.3",
     "react-router-dom": "^7.6.3"
   },
   "devDependencies": {
