@@ -7,9 +7,23 @@ html {
 }
 
 body {
-  @apply bg-transparent text-gray-200 antialiased;
+  @apply bg-black text-gray-200 antialiased;
   margin: 0;
   padding-top: 80px; /* Height of the navbar */
+}
+
+@layer utilities {
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .animate-spin-slow {
+    animation: spin-slow 3s linear infinite;
+  }
 }
 
 a {

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 
 export const Footer: React.FC = () => {
+  const location = window.location.pathname;
+  if (location.startsWith('/ai')) return null;
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
 

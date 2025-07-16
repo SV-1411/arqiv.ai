@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { SearchForm } from './SearchForm';
 import { ResultsDisplay } from './ResultsDisplay';
+import { AiLoadingScreen } from './AiLoadingScreen';
+import { Menu, X, Home, Sparkles, Brain } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useBook } from './BookContext';
+import '../hide-scroll.css';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { ImageResult } from '../types';
 
@@ -32,6 +37,29 @@ interface AiPageProps {
 }
 
 export const AiPage: React.FC<AiPageProps> = (props) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+  const { goToPage } = useBook();
+  const [showInitialLoader, setShowInitialLoader] = useState(true);
+  const [backgroundVideo, setBackgroundVideo] = useState('/vid.mp4'); // Default video
+
+  useEffect(() => {
+    // Disable body scroll when AI page is mounted
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowInitialLoader(false);
+    }, 2500); // Show loader for 2.5 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const [isSaving, setIsSaving] = useState(false);
   const [notification, setNotification] = useState({ message: '', type: 'success' as 'success' | 'error', show: false });
 
@@ -41,6 +69,10 @@ export const AiPage: React.FC<AiPageProps> = (props) => {
       setNotification({ message: '', type: 'success', show: false });
     }, 4000);
   };
+
+  if (showInitialLoader) {
+    return <AiLoadingScreen />;
+  }
 
   const handleSaveResult = async () => {
     if (!props.input.trim() || !props.result.trim()) {
@@ -96,8 +128,62 @@ export const AiPage: React.FC<AiPageProps> = (props) => {
     }
   };
 
+
+
   return (
-    <div className={`min-h-screen w-full ${props.backgroundClass ?? 'bg-[#0a0a0a]'} text-white relative pb-20`}>
+    <div className="relative h-screen w-full text-white overflow-y-auto hide-scrollbar px-4 md:px-8 py-6 md:py-10">
+      <div className="fixed inset-0 bg-black z-[-4]"></div>
+      {/* Static wallpaper image */}
+      <img
+        src="/brown.jpg"
+        alt="brown texture background"
+        className="fixed inset-0 w-full h-full object-cover z-[-3] opacity-80 brightness-25"
+      />
+      {/* Hamburger */}
+      <button className="fixed top-18 left-80 md:left-40 z-40 text-accent-500 hover:text-accent-600 p-2 rounded-md bg-white/10 backdrop-blur-sm" onClick={() => setIsSidebarOpen(true)}>
+        <Menu className="w-8 h-8" />
+      </button>
+
+      {/* Mobile Sidebar */}
+      <div className={`fixed top-0 left-0 h-full w-64 bg-surface-100/90 backdrop-blur-md shadow-lg z-50 transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex items-center justify-between p-4 border-b border-surface-200">
+          <h2 className="text-xl font-bold text-accent-500">Menu</h2>
+          <button onClick={() => setIsSidebarOpen(false)} className="text-accent-500 hover:text-accent-600">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="flex flex-col p-4 space-y-4">
+          <button onClick={() => {goToPage(0); navigate('/'); setIsSidebarOpen(false);}} className="flex items-center space-x-2 text-accent-500 hover:text-accent-600">
+            <Home className="w-5 h-5" />
+            <span>Home</span>
+          </button>
+          <button onClick={() => {goToPage(1); navigate('/about'); setIsSidebarOpen(false);}} className="flex items-center space-x-2 text-accent-500 hover:text-accent-600">
+            <Sparkles className="w-5 h-5" />
+            <span>About Us</span>
+          </button>
+          <button onClick={() => {goToPage(2); navigate('/ai'); setIsSidebarOpen(false);}} className="flex items-center space-x-2 text-accent-500 hover:text-accent-600">
+            <Brain className="w-5 h-5" />
+            <span>AI</span>
+          </button>
+        </div>
+      </div>
+      {isSidebarOpen && <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setIsSidebarOpen(false)} />}
+
+      {/* Video wallpaper */}
+      <div className="fixed inset-0 bg-black/70 z-[-1] pointer-events-none"></div>
+      <video
+        key={backgroundVideo}
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="fixed inset-0 w-full h-full object-cover z-[-2] opacity-15 transition-opacity duration-1000"
+      >
+        <source src={backgroundVideo} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      {/* Scrollable content wrapper */}
+      <div className="relative z-10 flex flex-col min-h-screen pb-20 pt-28 w-full max-w-5xl mx-auto">
       {notification.show && (
         <div 
           className={`fixed top-5 right-5 p-4 rounded-lg shadow-lg text-white z-50 transition-opacity duration-300 ${notification.type === 'success' ? 'bg-green-600' : 'bg-red-600'}`}
@@ -109,14 +195,15 @@ export const AiPage: React.FC<AiPageProps> = (props) => {
         <title>arqivAi - AI-Powered Research Assistant</title>
         <meta name="description" content="Unlock deeper insights with arqivAi, an AI-powered research assistant that synthesizes information from multiple sources to give you comprehensive answers. Start your intelligent search today." />
       </Helmet>
-      <div className="flex justify-end gap-4 mb-6 sticky top-4 z-40">
+      {/* Action buttons aligned to the far right */}
+      <div className="flex gap-4 absolute top-6 right-1 z-40">
         {props.user ? (
-          <div className="flex justify-end gap-4 mb-6">
-            <Link to="/saved" className="relative group inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-accent-500 to-pink-500 text-white font-semibold shadow-lg hover:to-yellow-400 transition-all">Saved Research</Link>
-            <Link to="/customize" className="relative group inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-pink-500 to-accent-500 text-white font-semibold shadow-lg hover:to-yellow-400 transition-all">Customize AI</Link>
-          </div>
+          <>
+            <Link to="/saved" className="relative group inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-brown-500 via-pink-300 to-brown-500 text-white font-semibold shadow-lg hover:to-yellow-400 transition-all">Saved Research</Link>
+            <Link to="/customize" className="relative group inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-brown-500 via-amber-500 to-brown-500 text-white font-semibold shadow-lg hover:to-yellow-400 transition-all">Customize AI</Link>
+          </>
         ) : (
-          <Link to="/" className="relative inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-accent-500 to-pink-500 text-white font-semibold shadow-lg hover:to-yellow-400 transition-all">Login / Sign&nbsp;Up</Link>
+          <Link to="/" className="relative inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-brown-500 via-pink-300 to-brown-500 text-white font-semibold shadow-lg hover:to-yellow-400 transition-all">Login / Sign&nbsp;Up</Link>
         )}
       </div>
 
@@ -172,6 +259,7 @@ export const AiPage: React.FC<AiPageProps> = (props) => {
           user={props.user}
           isSaving={isSaving}
         />
+      </div>
       </div>
     </div>
   );

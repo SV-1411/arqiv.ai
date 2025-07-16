@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import HTMLFlipBook from 'react-pageflip';
 import { useBook } from './BookContext';
 
@@ -8,6 +9,15 @@ interface BookProps {
 
 export const Book: React.FC<BookProps> = ({ pages }) => {
   const { bookRef, currentPage, setCurrentPage } = useBook();
+  const location = useLocation();
+
+  // When the route changes, update the flipbook's page
+  useEffect(() => {
+    const pageIndex = location.pathname === '/about' ? 1 : 0;
+    if (pageIndex !== currentPage) {
+      setCurrentPage(pageIndex);
+    }
+  }, [location.pathname, currentPage, setCurrentPage]);
   const [dimensions, setDimensions] = useState({ w: window.innerWidth, h: window.innerHeight });
 
   useEffect(() => {
@@ -17,13 +27,12 @@ export const Book: React.FC<BookProps> = ({ pages }) => {
   }, []);
 
   return (
-    // @ts-ignore: react-pageflip has imperfect typings
     <HTMLFlipBook
+      // @ts-ignore: react-pageflip has imperfect typings
       ref={bookRef}
       width={dimensions.w}
       height={dimensions.h}
       size="stretch"
-      // Force single page mode by setting min/max width to the screen width
       minWidth={dimensions.w}
       maxWidth={dimensions.w}
       usePortrait={true}
@@ -32,7 +41,6 @@ export const Book: React.FC<BookProps> = ({ pages }) => {
       mobileScrollSupport={true}
       onFlip={(e) => setCurrentPage(e.data)}
       startPage={currentPage}
-      // Use fixed positioning to ensure it covers the entire screen
       style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
       className="w-screen h-screen"
     >

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useBook } from './BookContext';
-import { useNavigate } from 'react-router-dom';
-import { Link, useLocation } from 'react-router-dom';
-import { Brain, Sparkles, User, LogOut, Bookmark, Home } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Brain, Sparkles, User, LogOut, Home, Menu, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { AuthModal } from './AuthModal';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -13,8 +12,14 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ user, isAuthLoading }) => {
+  const location = useLocation();
+  // Hide header only on the dedicated AI workspace page
+  if (location.pathname === '/ai') {
+    return null;
+  }
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const { goToPage } = useBook();
   const navigate = useNavigate();
@@ -71,8 +76,8 @@ export const Header: React.FC<HeaderProps> = ({ user, isAuthLoading }) => {
             </h1>
           </div>
 
-          {/* Navbar Links */}
-          <div className="flex items-center space-x-6">
+          {/* Desktop Navbar Links */}
+          <div className="hidden sm:flex items-center space-x-6">
             <button onClick={() => {goToPage(0); navigate('/');}} className="flex items-center space-x-2 text-accent-500 hover:text-accent-600 transition-colors">
               <Home className="w-5 h-5" />
               <span>Home</span>
@@ -153,8 +158,49 @@ export const Header: React.FC<HeaderProps> = ({ user, isAuthLoading }) => {
                 </button>
               )}
             </div>
-          </div>
+          </div> {/* Added closing tag here */}
+            {/* Mobile Hamburger */}
+          <button className="sm:hidden text-accent-500 hover:text-accent-600" onClick={() => setIsSidebarOpen(true)}>
+            <Menu className="w-7 h-7" />
+          </button>
         </nav>
+
+        {/* Mobile Sidebar */}
+        <div className={`fixed top-0 right-0 h-full w-72 bg-gradient-to-b from-[#0f0f0f] via-[#1a1a1a] to-[#0b0b0b] text-white backdrop-blur-lg shadow-2xl rounded-l-3xl z-50 transform transition-transform duration-300 border-l-4 border-accent-500/60 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}> 
+          <div className="flex items-center justify-between p-5 border-b border-gray-700">
+            <h2 className="text-2xl font-extrabold tracking-wide text-accent-500">Menu</h2>
+            <button onClick={() => setIsSidebarOpen(false)} className="text-gray-400 hover:text-white transition-colors">
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+          <div className="flex flex-col px-6 py-6 space-y-5">
+            <button onClick={() => { navigate('/'); goToPage(0); setIsSidebarOpen(false); }} className="flex items-center space-x-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-accent-500/20 transition-all transform hover:-translate-x-1 hover:shadow-lg text-accent-400 hover:text-white">
+              <Home className="w-5 h-5" />
+              <span>Home</span>
+            </button>
+            <button onClick={() => { navigate('/about'); goToPage(1); setIsSidebarOpen(false); }} className="flex items-center space-x-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-accent-500/20 transition-all transform hover:-translate-x-1 hover:shadow-lg text-accent-400 hover:text-white">
+              <Sparkles className="w-5 h-5" />
+              <span>About Us</span>
+            </button>
+            <button onClick={() => { navigate('/ai'); setIsSidebarOpen(false); }} className="flex items-center space-x-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-accent-500/20 transition-all transform hover:-translate-x-1 hover:shadow-lg text-accent-400 hover:text-white">
+              <Brain className="w-5 h-5" />
+              <span>AI</span>
+            </button>
+            {user ? (
+              <button onClick={() => {setIsUserMenuOpen(!isUserMenuOpen);}} className="flex items-center space-x-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-accent-500/20 transition-all transform hover:-translate-x-1 hover:shadow-lg text-accent-400 hover:text-white">
+                <User className="w-5 h-5" />
+                <span>Account</span>
+              </button>
+            ) : (
+              <button onClick={() => {setIsAuthModalOpen(true); setIsSidebarOpen(false);}} className="flex items-center space-x-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-accent-500/20 transition-all transform hover:-translate-x-1 hover:shadow-lg text-accent-400 hover:text-white">
+                <User className="w-5 h-5" />
+                <span>Sign In</span>
+              </button>
+            )}
+          </div>
+        </div>
+        {/* Overlay when sidebar open */}
+        {isSidebarOpen && <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setIsSidebarOpen(false)} />}
       </header>
 
       {/* Auth Modal */}

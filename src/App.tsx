@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Footer } from './components/Footer';
 
@@ -9,6 +10,7 @@ import { Header } from './components/Header';
 import { BookProvider } from './components/BookContext';
 import LandingPage from './components/LandingPage.tsx';
 import AboutPage from './components/AboutPage.tsx';
+import ParticlesComponent from './components/Particles';
 
 import { supabase } from './lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -24,6 +26,9 @@ function App() {
   const [wikiImage, setWikiImage] = useState('');
   const [images, setImages] = useState<ImageResult[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+
+  const location = useLocation();
+  const isAiRoute = location.pathname === '/ai';
   const [trendingSuggestions, setTrendingSuggestions] = useState<string[]>([]);
   const [isLoadingTrending, setIsLoadingTrending] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
@@ -639,52 +644,55 @@ Generate 5 similar curious topics related to "${topic}":`;
     );
   }
 
-  const pages = [
-    <LandingPage key="home" />,
-    <AboutPage key="about" />,
-    <RequireAuth key="ai" user={user}>
-      <AiPage
-        key="ai-inner"
-        trendingSuggestions={trendingSuggestions}
-        isLoadingTrending={isLoadingTrending}
-        input={input}
-        setInput={setInput}
-        mode={mode}
-        setMode={setMode}
-        depth={depth}
-        setDepth={setDepth}
-        isLoading={isLoading}
-        onSubmit={handleAskAI}
-        onKeyPress={handleKeyPress}
-        result={result}
-        isRegenerating={isRegenerating}
-        wikiImage={wikiImage}
-        images={images}
-        suggestions={suggestions}
-        isLoadingSuggestions={isLoadingSuggestions}
-        onRegenerate={handleRegenerateAnswer}
-        onSuggestionClick={handleSuggestionClick}
-        user={user}
-        backgroundClass="bg-[#0a0a0a]"
-      />
-    </RequireAuth>,
-  ];
+  const bookPages = [<LandingPage key="home" />, <AboutPage key="about" />];
 
   return (
-    <>
     <BookProvider>
-      <div className="relative min-h-screen bg-gray-100 dark:bg-gray-900">
+            <div className={`relative min-h-screen ${isAiRoute ? '' : 'bg-gray-100 dark:bg-gray-900'}`}>
+        <ParticlesComponent />
         <Helmet>
           <title>{pageTitle}</title>
         </Helmet>
         <Header user={user} isAuthLoading={authLoading} />
-        <Book pages={pages} />
+        <main>
+          <Routes>
+            <Route path="/" element={<Book pages={bookPages} />} />
+            <Route path="/about" element={<Book pages={bookPages} />} />
+            <Route
+              path="/ai"
+              element={
+                <RequireAuth user={user}>
+                  <AiPage
+                    trendingSuggestions={trendingSuggestions}
+                    isLoadingTrending={isLoadingTrending}
+                    input={input}
+                    setInput={setInput}
+                    mode={mode}
+                    setMode={setMode}
+                    depth={depth}
+                    setDepth={setDepth}
+                    isLoading={isLoading}
+                    onSubmit={handleAskAI}
+                    onKeyPress={handleKeyPress}
+                    result={result}
+                    isRegenerating={isRegenerating}
+                    wikiImage={wikiImage}
+                    images={images}
+                    suggestions={suggestions}
+                    isLoadingSuggestions={isLoadingSuggestions}
+                    onRegenerate={handleRegenerateAnswer}
+                    onSuggestionClick={handleSuggestionClick}
+                    user={user}
+                    backgroundClass="bg-[#0a0a0a]"
+                  />
+                </RequireAuth>
+              }
+            />
+          </Routes>
+        </main>
       </div>
-     
+      <Footer />
     </BookProvider>
-   
-    <Footer />
-    </>
   );
 }
 
