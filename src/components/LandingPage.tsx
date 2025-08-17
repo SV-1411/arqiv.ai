@@ -1,5 +1,7 @@
 import React from 'react';
+import TextTrail from './TextTrail';
 import { Link } from 'react-router-dom';
+
 
 export const LandingPage: React.FC = () => {
   return (
@@ -21,9 +23,26 @@ export const LandingPage: React.FC = () => {
       <section className="relative z-20 min-h-screen pt-48 pb-32 text-white text-center space-y-24">
         {/* Hero */}
         <div className="space-y-8">
-          <h1 className="text-6xl md:text-8xl font-black font-mono tracking-tighter text-shadow-lg">
-            Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-pink-300 to-amber-500">arqivAi</span>
-          </h1>
+          <div className="flex flex-col items-center justify-center gap-6 text-shadow-lg">
+            <h1 className="relative z-10 text-4xl md:text-6xl lg:text-7xl font-black font-mono tracking-tighter">Where curiosity comes to die</h1>
+            <div className="relative z-0 w-[95vw] max-w-[1400px] h-60 md:h-80 lg:h-[28rem] xl:h-[34rem] mx-auto mt-2 overflow-visible">
+              <TextTrail
+                text="arqivAi"
+                fontFamily="Figtree"
+                fontWeight="900"
+                noiseFactor={1.2}
+                noiseScale={0.001}
+                rgbPersistFactor={0.97}
+                alphaPersistFactor={0.94}
+                animateColor={false}
+                startColor="#ffffff"
+                textColor="#ffffff"
+                backgroundColor="transparent"
+                colorCycleInterval={2400}
+                supersample={3}
+              />
+            </div>
+          </div>
           <p className="max-w-3xl mx-auto text-xl text-gray-300">
             Your not-so-personal AI research companion. Ask ridiculously complex questions, get surprisingly coherent answers.
           </p>

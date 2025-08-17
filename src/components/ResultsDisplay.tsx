@@ -1,7 +1,8 @@
 import React from 'react';
-import { FileText, Clock, Globe, BookOpen, Bookmark, RefreshCw, Search, Sparkles, ImageIcon } from 'lucide-react';
+import { FileText, Clock, Globe, BookOpen, Bookmark, RefreshCw, Search, Sparkles, ImageIcon, ExternalLink, Quote } from 'lucide-react';
 import { ImageResult } from '../types';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { type ResearchSource } from '../lib/enhancedApiServices';
 
 interface ResultsDisplayProps {
   result: string;
@@ -19,6 +20,8 @@ interface ResultsDisplayProps {
   onSuggestionClick: (suggestion: string) => void;
   user: SupabaseUser | null;
   isSaving: boolean;
+  enhancedSources: ResearchSource[];
+  citations: string;
 }
 
 export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
@@ -36,7 +39,9 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   onRegenerate,
   onSuggestionClick,
   user,
-  isSaving
+  isSaving,
+  enhancedSources,
+  citations
 }) => {
   const getDepthIcon = (depth: string) => {
     switch (depth) {
@@ -55,6 +60,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
       case 'Year': return '🗓️';
       case 'Concept': return '💡';
       case 'Location': return '🌍';
+      case 'Research Buddy': return '📖';
       default: return '🔍';
     }
   };
@@ -231,6 +237,56 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
             )}
           </div>
         </div>
+
+        {/* Enhanced Research Sources Section */}
+        {enhancedSources.length > 0 && (
+          <div className="mt-8 border-t border-gray-600 pt-6">
+            <div className="flex items-center mb-4">
+              <Quote className="w-5 h-5 text-[#00bfff] mr-2" />
+              <h4 className="text-lg font-bold text-white">Research Sources ({enhancedSources.length})</h4>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {enhancedSources.map((source, index) => (
+                <div key={index} className="bg-[#333333] rounded-lg p-4 border border-gray-600 hover:border-[#00bfff] transition-colors">
+                  <div className="flex items-start justify-between mb-2">
+                    <h5 className="text-white font-semibold text-sm line-clamp-2">{source.title}</h5>
+                    <a 
+                      href={source.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-[#00bfff] hover:text-blue-300 ml-2 flex-shrink-0"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  </div>
+                  <p className="text-gray-300 text-xs mb-2 line-clamp-3">{source.content.substring(0, 150)}...</p>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-[#00bfff] bg-[#00bfff] bg-opacity-20 px-2 py-1 rounded">{source.source}</span>
+                    {source.publishedDate && (
+                      <span className="text-gray-400">{new Date(source.publishedDate).getFullYear()}</span>
+                    )}
+                  </div>
+                  {source.authors && source.authors.length > 0 && (
+                    <p className="text-gray-400 text-xs mt-1">By: {source.authors.slice(0, 2).join(', ')}{source.authors.length > 2 ? ' et al.' : ''}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Citations Section */}
+        {citations && (
+          <div className="mt-6 border-t border-gray-600 pt-6">
+            <div className="flex items-center mb-3">
+              <BookOpen className="w-5 h-5 text-[#00bfff] mr-2" />
+              <h4 className="text-lg font-bold text-white">Citations & References</h4>
+            </div>
+            <div className="bg-[#333333] rounded-lg p-4 border border-gray-600">
+              <pre className="text-gray-300 text-sm whitespace-pre-wrap font-mono">{citations}</pre>
+            </div>
+          </div>
+        )}
 
         {/* Related Explorations Section */}
         {(suggestions.length > 0 || isLoadingSuggestions) && result && !isLoading && (

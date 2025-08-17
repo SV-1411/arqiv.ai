@@ -457,6 +457,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({
               <option value="Year">🗓️ Specific Year</option>
               <option value="Concept">💡 Concept/Idea</option>
               <option value="Location">🌍 Place/Location</option>
+              <option value="Research Buddy">📖 Research Buddy</option>
             </select>
             <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
           </div>

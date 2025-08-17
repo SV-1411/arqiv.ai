@@ -5,6 +5,7 @@ import { SearchForm } from './SearchForm';
 import { ResultsDisplay } from './ResultsDisplay';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { ImageResult } from '../types';
+import { type ResearchSource } from '../lib/enhancedApiServices';
 
 interface HomePageProps {
   trendingSuggestions: string[];
@@ -27,6 +28,8 @@ interface HomePageProps {
   onRegenerate: () => void;
   onSuggestionClick: (suggestion: string) => void;
   user: SupabaseUser | null;
+  enhancedSources: ResearchSource[];
+  citations: string;
 }
 
 export const HomePage: React.FC<HomePageProps> = (props) => {
@@ -96,6 +99,7 @@ export const HomePage: React.FC<HomePageProps> = (props) => {
 
   return (
     <>
+    
       {notification.show && (
         <div 
           className={`fixed top-5 right-5 p-4 rounded-lg shadow-lg text-white z-50 transition-opacity duration-300 ${notification.type === 'success' ? 'bg-green-600' : 'bg-red-600'}`}
@@ -158,6 +162,8 @@ export const HomePage: React.FC<HomePageProps> = (props) => {
           onSuggestionClick={props.onSuggestionClick}
           user={props.user}
           isSaving={isSaving}
+          enhancedSources={props.enhancedSources}
+          citations={props.citations}
         />
       </div>
     </>

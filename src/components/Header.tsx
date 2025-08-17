@@ -166,35 +166,35 @@ export const Header: React.FC<HeaderProps> = ({ user, isAuthLoading }) => {
         </nav>
 
         {/* Mobile Sidebar */}
-        <div className={`fixed top-0 right-0 h-full w-72 bg-gradient-to-b from-[#0f0f0f] via-[#1a1a1a] to-[#0b0b0b] text-white backdrop-blur-lg shadow-2xl rounded-l-3xl z-50 transform transition-transform duration-300 border-l-4 border-accent-500/60 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}> 
-          <div className="flex items-center justify-between p-5 border-b border-gray-700">
-            <h2 className="text-2xl font-extrabold tracking-wide text-accent-500">Menu</h2>
-            <button onClick={() => setIsSidebarOpen(false)} className="text-gray-400 hover:text-white transition-colors">
-              <X className="w-6 h-6" />
+        <div className={`fixed top-0 right-0 h-full w-80 bg-gradient-to-b from-[#0f0f0f] via-[#1a1a1a] to-[#0b0b0b] text-white backdrop-blur-lg shadow-2xl rounded-l-3xl z-50 transform transition-transform duration-300 border-l-4 border-accent-500/60 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}> 
+          <div className="flex items-center justify-between p-6 border-b border-gray-700">
+            <h2 className="text-3xl font-extrabold tracking-wide text-accent-500">Menu</h2>
+            <button onClick={() => setIsSidebarOpen(false)} className="text-gray-400 hover:text-white hover:scale-110 transition-all duration-200">
+              <X className="w-7 h-7" />
             </button>
           </div>
-          <div className="flex flex-col px-6 py-6 space-y-5">
-            <button onClick={() => { navigate('/'); goToPage(0); setIsSidebarOpen(false); }} className="flex items-center space-x-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-accent-500/20 transition-all transform hover:-translate-x-1 hover:shadow-lg text-accent-400 hover:text-white">
-              <Home className="w-5 h-5" />
-              <span>Home</span>
+          <div className="flex flex-col px-6 py-8 space-y-6">
+            <button onClick={() => { navigate('/'); goToPage(0); setIsSidebarOpen(false); }} className="group flex items-center space-x-4 px-5 py-4 rounded-xl bg-white/5 hover:bg-accent-500/30 transition-all duration-300 transform hover:-translate-x-2 hover:scale-105 hover:shadow-xl text-accent-400 hover:text-white border border-transparent hover:border-accent-500/50">
+              <Home className="w-6 h-6 group-hover:animate-pulse" />
+              <span className="text-lg font-semibold">Home</span>
             </button>
-            <button onClick={() => { navigate('/about'); goToPage(1); setIsSidebarOpen(false); }} className="flex items-center space-x-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-accent-500/20 transition-all transform hover:-translate-x-1 hover:shadow-lg text-accent-400 hover:text-white">
-              <Sparkles className="w-5 h-5" />
-              <span>About Us</span>
+            <button onClick={() => { navigate('/about'); goToPage(1); setIsSidebarOpen(false); }} className="group flex items-center space-x-4 px-5 py-4 rounded-xl bg-white/5 hover:bg-accent-500/30 transition-all duration-300 transform hover:-translate-x-2 hover:scale-105 hover:shadow-xl text-accent-400 hover:text-white border border-transparent hover:border-accent-500/50">
+              <Sparkles className="w-6 h-6 group-hover:animate-pulse" />
+              <span className="text-lg font-semibold">About Us</span>
             </button>
-            <button onClick={() => { navigate('/ai'); setIsSidebarOpen(false); }} className="flex items-center space-x-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-accent-500/20 transition-all transform hover:-translate-x-1 hover:shadow-lg text-accent-400 hover:text-white">
-              <Brain className="w-5 h-5" />
-              <span>AI</span>
+            <button onClick={() => { navigate('/ai'); setIsSidebarOpen(false); }} className="group flex items-center space-x-4 px-5 py-4 rounded-xl bg-white/5 hover:bg-accent-500/30 transition-all duration-300 transform hover:-translate-x-2 hover:scale-105 hover:shadow-xl text-accent-400 hover:text-white border border-transparent hover:border-accent-500/50">
+              <Brain className="w-6 h-6 group-hover:animate-pulse" />
+              <span className="text-lg font-semibold">AI</span>
             </button>
             {user ? (
-              <button onClick={() => {setIsUserMenuOpen(!isUserMenuOpen);}} className="flex items-center space-x-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-accent-500/20 transition-all transform hover:-translate-x-1 hover:shadow-lg text-accent-400 hover:text-white">
-                <User className="w-5 h-5" />
-                <span>Account</span>
+              <button onClick={() => {setIsUserMenuOpen(!isUserMenuOpen);}} className="group flex items-center space-x-4 px-5 py-4 rounded-xl bg-white/5 hover:bg-accent-500/30 transition-all duration-300 transform hover:-translate-x-2 hover:scale-105 hover:shadow-xl text-accent-400 hover:text-white border border-transparent hover:border-accent-500/50">
+                <User className="w-6 h-6 group-hover:animate-pulse" />
+                <span className="text-lg font-semibold">Account</span>
               </button>
             ) : (
-              <button onClick={() => {setIsAuthModalOpen(true); setIsSidebarOpen(false);}} className="flex items-center space-x-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-accent-500/20 transition-all transform hover:-translate-x-1 hover:shadow-lg text-accent-400 hover:text-white">
-                <User className="w-5 h-5" />
-                <span>Sign In</span>
+              <button onClick={() => {setIsAuthModalOpen(true); setIsSidebarOpen(false);}} className="group flex items-center space-x-4 px-5 py-4 rounded-xl bg-white/5 hover:bg-accent-500/30 transition-all duration-300 transform hover:-translate-x-2 hover:scale-105 hover:shadow-xl text-accent-400 hover:text-white border border-transparent hover:border-accent-500/50">
+                <User className="w-6 h-6 group-hover:animate-pulse" />
+                <span className="text-lg font-semibold">Sign In</span>
               </button>
             )}
           </div>

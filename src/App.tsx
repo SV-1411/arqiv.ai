@@ -15,6 +15,13 @@ import ParticlesComponent from './components/Particles';
 import { supabase } from './lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { ImageResult } from './types';
+import { 
+  fetchEnhancedResearch, 
+  generateEnhancedPrompt, 
+  analyzePrompt, 
+  generateCitations,
+  type ResearchSource 
+} from './lib/enhancedApiServices';
 
 function App() {
   const [pageTitle, setPageTitle] = useState('Arqiv.ai');
@@ -36,6 +43,8 @@ function App() {
   
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [enhancedSources, setEnhancedSources] = useState<ResearchSource[]>([]);
+  const [citations, setCitations] = useState<string>('');
   
   
 
@@ -264,9 +273,25 @@ function App() {
     additionalPrompt: string;
   }
 
-  const generatePrompt = (question: string, wikiData: any, mode: string, depth: string, settings: UserAISettings | null, isRegeneration: boolean = false) => {
-    const wikiExtract = wikiData.extract;
-    const searchContext = null; // Prepared for future web search integration
+  // Legacy prompt generation function removed - now using generateEnhancedPrompt from enhancedApiServices
+  // This comment serves as documentation for the migration to the enhanced system
+  // Legacy prompt kept for reference but refactored to be self-contained.
+const legacyPromptNote = ({
+  wikiExtract = null,
+  question,
+  mode,
+  depth,
+  isRegeneration = false,
+  settings = null,
+}: {
+  wikiExtract?: string | null;
+  question: string;
+  mode: string;
+  depth: string;
+  isRegeneration?: boolean;
+  settings?: UserAISettings | null;
+}) => {
+  const searchContext = null; // Prepared for future web search integration
     
     const variations = getRandomPromptVariations();
     const randomSeed = Math.floor(Math.random() * 1000);
@@ -438,10 +463,16 @@ Generate 5 similar curious topics related to "${topic}":`;
       setWikiImage('');
       setImages([]);
       setSuggestions([]);
+      setEnhancedSources([]);
+      setCitations('');
     }
     
     try {
-      // Fetch Wikipedia summary first
+      // 1. Analyze the prompt for intent, tone, and complexity
+      const promptAnalysis = analyzePrompt(question, mode);
+      console.log('🧠 Prompt Analysis:', promptAnalysis);
+      
+      // 2. Fetch Wikipedia summary (existing)
       const wikiData = await fetchWikiSummary(question);
       
       // Store the image if available
@@ -449,10 +480,21 @@ Generate 5 similar curious topics related to "${topic}":`;
         setWikiImage(wikiData.thumbnail);
       }
       
-      // Fetch research-grade images
+      // 3. Fetch enhanced research from multiple sources
+      console.log('🔍 Fetching enhanced research sources...');
+      const enhancedResearchSources = await fetchEnhancedResearch(question, mode);
+      setEnhancedSources(enhancedResearchSources);
+      console.log('📚 Enhanced Sources Found:', enhancedResearchSources.length);
+      
+      // 4. Generate citations
+      const citationsText = generateCitations(enhancedResearchSources);
+      setCitations(citationsText);
+      
+      // 5. Fetch research-grade images (existing)
       const fetchedImages = await fetchResearchImages(question);
       setImages(fetchedImages);
       
+      // 6. Get user settings
       let userSettings: UserAISettings | null = null;
       if (user) {
         const raw = localStorage.getItem(`custom_settings_${user.id}`);
@@ -460,7 +502,20 @@ Generate 5 similar curious topics related to "${topic}":`;
           try { userSettings = JSON.parse(raw); } catch {}
         }
       }
-      const prompt = generatePrompt(question, wikiData, mode, depth, userSettings, isRegeneration);
+      
+      // 7. Generate enhanced prompt with multi-source context
+      const prompt = generateEnhancedPrompt(
+        question, 
+        wikiData, 
+        enhancedResearchSources, 
+        mode, 
+        depth, 
+        userSettings, 
+        promptAnalysis, 
+        isRegeneration
+      );
+      
+      console.log('📝 Enhanced Prompt Generated:', prompt.length, 'characters');
       
       const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
       if (!apiKey) {
@@ -683,6 +738,8 @@ Generate 5 similar curious topics related to "${topic}":`;
                     onRegenerate={handleRegenerateAnswer}
                     onSuggestionClick={handleSuggestionClick}
                     user={user}
+                    enhancedSources={enhancedSources}
+                    citations={citations}
                     backgroundClass="bg-[#0a0a0a]"
                   />
                 </RequireAuth>

@@ -11,6 +11,7 @@ import { useBook } from './BookContext';
 import '../hide-scroll.css';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { ImageResult } from '../types';
+import { type ResearchSource } from '../lib/enhancedApiServices';
 
 interface AiPageProps {
   backgroundClass?: string;
@@ -34,6 +35,8 @@ interface AiPageProps {
   onRegenerate: () => void;
   onSuggestionClick: (suggestion: string) => void;
   user: SupabaseUser | null;
+  enhancedSources: ResearchSource[];
+  citations: string;
 }
 
 export const AiPage: React.FC<AiPageProps> = (props) => {
@@ -145,25 +148,25 @@ export const AiPage: React.FC<AiPageProps> = (props) => {
       </button>
 
       {/* Mobile Sidebar */}
-      <div className={`fixed top-0 left-0 h-full w-64 bg-surface-100/90 backdrop-blur-md shadow-lg z-50 transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex items-center justify-between p-4 border-b border-surface-200">
-          <h2 className="text-xl font-bold text-accent-500">Menu</h2>
-          <button onClick={() => setIsSidebarOpen(false)} className="text-accent-500 hover:text-accent-600">
-            <X className="w-6 h-6" />
+      <div className={`fixed top-0 left-0 h-full w-80 bg-gradient-to-b from-[#0f0f0f] via-[#1a1a1a] to-[#0b0b0b] backdrop-blur-xl shadow-2xl z-50 transform transition-transform duration-300 border-r-4 border-accent-500/60 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex items-center justify-between p-6 border-b border-gray-700">
+          <h2 className="text-3xl font-extrabold tracking-wide text-accent-500">Menu</h2>
+          <button onClick={() => setIsSidebarOpen(false)} className="text-gray-400 hover:text-white hover:scale-110 transition-all duration-200">
+            <X className="w-7 h-7" />
           </button>
         </div>
-        <div className="flex flex-col p-4 space-y-4">
-          <button onClick={() => {goToPage(0); navigate('/'); setIsSidebarOpen(false);}} className="flex items-center space-x-2 text-accent-500 hover:text-accent-600">
-            <Home className="w-5 h-5" />
-            <span>Home</span>
+        <div className="flex flex-col px-6 py-8 space-y-6">
+          <button onClick={() => {goToPage(0); navigate('/'); setIsSidebarOpen(false);}} className="group flex items-center space-x-4 px-5 py-4 rounded-xl bg-white/5 hover:bg-accent-500/30 transition-all duration-300 transform hover:translate-x-2 hover:scale-105 hover:shadow-xl text-accent-400 hover:text-white border border-transparent hover:border-accent-500/50">
+            <Home className="w-6 h-6 group-hover:animate-pulse" />
+            <span className="text-lg font-semibold">Home</span>
           </button>
-          <button onClick={() => {goToPage(1); navigate('/about'); setIsSidebarOpen(false);}} className="flex items-center space-x-2 text-accent-500 hover:text-accent-600">
-            <Sparkles className="w-5 h-5" />
-            <span>About Us</span>
+          <button onClick={() => {goToPage(1); navigate('/about'); setIsSidebarOpen(false);}} className="group flex items-center space-x-4 px-5 py-4 rounded-xl bg-white/5 hover:bg-accent-500/30 transition-all duration-300 transform hover:translate-x-2 hover:scale-105 hover:shadow-xl text-accent-400 hover:text-white border border-transparent hover:border-accent-500/50">
+            <Sparkles className="w-6 h-6 group-hover:animate-pulse" />
+            <span className="text-lg font-semibold">About Us</span>
           </button>
-          <button onClick={() => {goToPage(2); navigate('/ai'); setIsSidebarOpen(false);}} className="flex items-center space-x-2 text-accent-500 hover:text-accent-600">
-            <Brain className="w-5 h-5" />
-            <span>AI</span>
+          <button onClick={() => {goToPage(2); navigate('/ai'); setIsSidebarOpen(false);}} className="group flex items-center space-x-4 px-5 py-4 rounded-xl bg-white/5 hover:bg-accent-500/30 transition-all duration-300 transform hover:translate-x-2 hover:scale-105 hover:shadow-xl text-accent-400 hover:text-white border border-transparent hover:border-accent-500/50">
+            <Brain className="w-6 h-6 group-hover:animate-pulse" />
+            <span className="text-lg font-semibold">AI</span>
           </button>
         </div>
       </div>
@@ -258,6 +261,8 @@ export const AiPage: React.FC<AiPageProps> = (props) => {
           onSuggestionClick={props.onSuggestionClick}
           user={props.user}
           isSaving={isSaving}
+          enhancedSources={props.enhancedSources}
+          citations={props.citations}
         />
       </div>
       </div>
